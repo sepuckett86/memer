@@ -102,7 +102,7 @@ describe('memes routes', () => {
     });
 
     return request(app)
-      .delete(`/api/v1/meme/${meme._id}`)
+      .delete(`/api/v1/memes/${meme._id}`)
       .then(res => {
         const memeJSON = JSON.parse(JSON.stringify(meme));
         expect(res.body).toEqual(memeJSON);
