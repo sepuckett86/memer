@@ -67,5 +67,31 @@ describe('memes routes', () => {
         expect(res.body).toEqual(memeJSON);
       });
   });
+
+  it('updates a meme', async() => {
+    const meme = await Meme.create({
+      top: 'One does not simply',
+      image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
+      bottom: 'Write memes'
+    });
+
+    const update = { 
+      top: 'Update',
+      bottom: 'The Meme'
+    };
+
+    return request(app)
+      .patch(`/api/v1/memes/${meme._id}`)
+      .send(update)
+      .then(res => {
+        expect(res.body).toEqual({
+          _id: expect.any(String),
+          top: 'Update',
+          image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
+          bottom: 'The Meme',
+          __v : 0
+        });
+      });
+  });
 });
 
