@@ -4,7 +4,7 @@ const request = require('supertest');
 const app = require('../lib/app');
 const connect = require('../lib/utils/connect');
 const mongoose = require('mongoose');
-// const Meme = require('../lib/models/Meme');
+const Meme = require('../lib/models/Meme');
 
 describe('memes routes', () => {
   beforeAll(() => {
@@ -21,7 +21,7 @@ describe('memes routes', () => {
 
   it('posts a new meme', () => {
     return request(app)
-      .post('/api/v1/meme')
+      .post('/api/v1/memes')
       .send({
         top: 'One does not simply',
         image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
@@ -35,6 +35,21 @@ describe('memes routes', () => {
           bottom: 'Write memes',
           __v : 0
         });
+      });
+  });
+
+  it('gets all memes', async() => {
+    const meme = await Meme.create({
+      top: 'One does not simply',
+      image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
+      bottom: 'Write memes'
+    });
+
+    return request(app)
+      .get('/api/v1/memes')
+      .then(res => {
+        const memeJSON = JSON.parse(JSON.stringify(meme));
+        expect(res.body).toEqual([memeJSON]);
       });
   });
 });
