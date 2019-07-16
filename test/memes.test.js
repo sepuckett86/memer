@@ -93,5 +93,20 @@ describe('memes routes', () => {
         });
       });
   });
+
+  it('deletes a meme', async() => {
+    const meme = await Meme.create({
+      top: 'One does not simply',
+      image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
+      bottom: 'Write memes'
+    });
+
+    return request(app)
+      .delete(`/api/v1/meme/${meme._id}`)
+      .then(res => {
+        const memeJSON = JSON.parse(JSON.stringify(meme));
+        expect(res.body).toEqual(memeJSON);
+      });
+  });
 });
 
