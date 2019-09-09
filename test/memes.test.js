@@ -2,111 +2,54 @@ require('dotenv').config();
 
 const request = require('supertest');
 const app = require('../lib/app');
-const connect = require('../lib/utils/connect');
-const mongoose = require('mongoose');
-const Meme = require('../lib/models/Meme');
+const client = require('../lib/utils/client');
+const child_process = require('child_process');
 
-describe('memes routes', () => {
-  beforeAll(() => {
-    connect();
-  });
-
+describe('app routes', () => {
   beforeEach(() => {
-    return mongoose.connection.dropDatabase();
+    child_process.execSync('npm run recreate-tables');
   });
 
   afterAll(() => {
-    return mongoose.connection.close();
+    client.end();
   });
 
-  it('posts a new meme', () => {
-    return request(app)
-      .post('/api/v1/memes')
-      .send({
-        top: 'One does not simply',
-        image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
-        bottom: 'Write memes'
-      })
-      .then(res => {
-        expect(res.body).toEqual({
-          _id: expect.any(String),
-          top: 'One does not simply',
-          image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
-          bottom: 'Write memes',
-          __v : 0
-        });
+  const TEST_MEME = {
+    top: 'One does not simply',
+    image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
+    bottom: 'Learn postgres'
+  };
+
+  const createMeme = (meme = TEST_MEME) => request(app)
+    .post('/api/v1/memes')
+    .expect(200)
+    .send(meme);
+
+  const testMeme = meme => {
+    expect(meme).toEqual({
+      id: expect.any(Number),
+      top: 'One does not simply',
+      image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
+      bottom: 'Learn postgres'
+    });
+  };
+
+  it('creates a meme', () => {
+    return createMeme()
+      .then(({ body }) => {
+        testMeme(body);
       });
   });
 
   it('gets all memes', async() => {
-    const meme = await Meme.create({
-      top: 'One does not simply',
-      image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
-      bottom: 'Write memes'
-    });
+    await createMeme();
+    await createMeme();
 
     return request(app)
       .get('/api/v1/memes')
-      .then(res => {
-        const memeJSON = JSON.parse(JSON.stringify(meme));
-        expect(res.body).toEqual([memeJSON]);
-      });
-  });
-
-  it('gets meme by id', async() => {
-    const meme = await Meme.create({
-      top: 'One does not simply',
-      image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
-      bottom: 'Write memes'
-    });
-
-    return request(app)
-      .get(`/api/v1/memes/${meme._id}`)
-      .then(res => {
-        const memeJSON = JSON.parse(JSON.stringify(meme));
-        expect(res.body).toEqual(memeJSON);
-      });
-  });
-
-  it('updates a meme', async() => {
-    const meme = await Meme.create({
-      top: 'One does not simply',
-      image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
-      bottom: 'Write memes'
-    });
-
-    const update = { 
-      top: 'Update',
-      bottom: 'The Meme'
-    };
-
-    return request(app)
-      .patch(`/api/v1/memes/${meme._id}`)
-      .send(update)
-      .then(res => {
-        expect(res.body).toEqual({
-          _id: expect.any(String),
-          top: 'Update',
-          image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
-          bottom: 'The Meme',
-          __v : 0
-        });
-      });
-  });
-
-  it('deletes a meme', async() => {
-    const meme = await Meme.create({
-      top: 'One does not simply',
-      image: 'https://imgflip.com/s/meme/One-Does-Not-Simply.jpg',
-      bottom: 'Write memes'
-    });
-
-    return request(app)
-      .delete(`/api/v1/memes/${meme._id}`)
-      .then(res => {
-        const memeJSON = JSON.parse(JSON.stringify(meme));
-        expect(res.body).toEqual(memeJSON);
+      .then(({ body }) => {
+        testMeme(body[0]);
+        expect(body).toEqual(expect.any(Array));
       });
   });
 });
-

@@ -10,7 +10,10 @@
     "test": "jest --verbose --runInBand",
     "test:watch": "npm run test -- --watch",
     "start": "node server.js",
-    "start:watch": "nodemon server.js"
+    "start:watch": "nodemon server.js",
+    "drop-tables": "node data/drop-tables.js",
+    "create-tables": "node data/create-tables.js",
+    "recreate-tables": "npm run drop-tables && npm run create-tables"
   },
   "repository": {
     "type": "git",
@@ -31,8 +34,8 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^8.0.0",
+    "dotenv": "^8.1.0",
     "express": "^4.17.1",
-    "mongoose": "^5.6.4"
+    "pg": "^7.12.1"
   }
 }
