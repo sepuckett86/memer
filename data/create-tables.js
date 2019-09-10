@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 const client = require('../lib/utils/client');
 
 client.query(`

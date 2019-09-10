@@ -52,4 +52,32 @@ describe('app routes', () => {
         expect(body).toEqual(expect.any(Array));
       });
   });
+
+  it('gets meme by id', async() => {
+    const meme = await createMeme();
+    return request(app)
+      .get(`/api/v1/memes/${meme.body.id}`)
+      .then(({ body }) => {
+        testMeme(body);
+      });
+  });
+
+  it('updates meme by id', async() => {
+    const meme = await createMeme();
+    return request(app)
+      .put(`/api/v1/memes/${meme.body.id}`)
+      .send({ ...meme.body, bottom: 'Learn to code' })
+      .then(({ body }) => {
+        expect(body.bottom).toBe('Learn to code');
+      });
+  });
+
+  it('deletes meme by id', async() => {
+    const meme = await createMeme();
+    return request(app)
+      .delete(`/api/v1/memes/${meme.body.id}`)
+      .then(({ body }) => {
+        testMeme(body);
+      });
+  });
 });
